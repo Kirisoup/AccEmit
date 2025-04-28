@@ -5,14 +5,15 @@ namespace AccEmit;
 
 public static partial class Emit
 {
-	extension (FieldInfo field) {
-		public Action<Val> EmitStsfld<Val>() {
+	extension (FieldInfo field) 
+	{
+		public Action<Val> EmitStaticSet<Val>() {
 			if (field.FieldType != typeof(Val)) 
 				throw new ArgumentException($"field is not of type {typeof(Val)}", nameof(field));
 			return StsfldDmd<Val>(field);
 		}
 
-		public Action<object> EmitStsfldBoxed() => StsfldDmd<object>(
+		public Action<object> EmitStaticSetBox() => StsfldDmd<object>(
 			field,
 			valMap: !field.FieldType.IsValueType ? null : 
 				il => il.Emit(OpCodes.Unbox_Any, field.FieldType));		

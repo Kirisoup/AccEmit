@@ -29,12 +29,12 @@ public static partial class Emit
 			return CallDm(typeof(Args), typeof(Ret), method).Create<Func<Args, Ret>>();
 		}
 
-		public Func<object> EmitCallBoxed() => 
+		public Func<object> EmitCallBox() => 
 			CallDm(null, typeof(object), method,
 				mapRet: il => il.Emit(OpCodes.Box, method.ReturnType))
 			.Create<Func<object>>();
 
-		public Func<Args, object> EmitCallBoxed<Args>() => 
+		public Func<Args, object> EmitCallBox<Args>() => 
 			CallDm(typeof(Args), typeof(object), method, 
 				mapRet: il => il.Emit(OpCodes.Box, method.ReturnType))
 			.Create<Func<Args, object>>();

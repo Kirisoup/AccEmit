@@ -6,12 +6,12 @@ namespace AccEmit;
 public static partial class Emit
 {
 	extension (FieldInfo field) {
-		public Func<Val> EmitLdsfld<Val>() {
+		public Func<Val> EmitStaticLoad<Val>() {
 			if (!field.IsStatic) throw new ArgumentException($"cannot call ldsfld on a static field", nameof(field));
 			return LdsfldDm<Val>(field);
 		}
 
-		public Func<object> EmitLdsfldBoxed() => LdsfldDm<object>(
+		public Func<object> EmitStaticLoadBox() => LdsfldDm<object>(
 			field,
 			mapRet: !field.FieldType.IsValueType ? null : 
 				il => il.Emit(OpCodes.Box, field.FieldType));
