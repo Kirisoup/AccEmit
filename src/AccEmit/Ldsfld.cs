@@ -5,18 +5,19 @@ namespace AccEmit;
 
 public static partial class Emit
 {
-	public static Func<Val> Ldsfld<Val>(FieldInfo field) {
-		if (!field.IsStatic) throw new ArgumentException($"cannot call ldsfld on a static field", nameof(field));
-		return LdsfldDmd<Val>(field);
+	extension (FieldInfo field) {
+		public Func<Val> EmitLdsfld<Val>() {
+			if (!field.IsStatic) throw new ArgumentException($"cannot call ldsfld on a static field", nameof(field));
+			return LdsfldDm<Val>(field);
+		}
+
+		public Func<object> EmitLdsfldBoxed() => LdsfldDm<object>(
+			field,
+			mapRet: !field.FieldType.IsValueType ? null : 
+				il => il.Emit(OpCodes.Box, field.FieldType));
 	}
 
-	[Obsolete("shit is unsafe, dont use unless you have to")]
-	public static Func<object> LdsfldBox(FieldInfo field) => LdsfldDmd<object>(
-		field,
-		mapRet: !field.FieldType.IsValueType ? null : 
-			il => il.Emit(OpCodes.Box, field.FieldType));
-
-	static Func<Ret> LdsfldDmd<Ret>(FieldInfo fi, Action<ILGenerator>? mapRet = null) {
+	static Func<Ret> LdsfldDm<Ret>(FieldInfo fi, Action<ILGenerator>? mapRet = null) {
 		if (fi.FieldType != typeof(Ret)) 
 			throw new ArgumentException($"field is not of type {typeof(Ret)}");
 		var dm = new DynamicMethod(

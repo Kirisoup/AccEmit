@@ -6,38 +6,41 @@ namespace AccEmit;
 // using Debug = System.Debug;
 public static partial class Emit
 {
-	public static Action CallVoid(MethodInfo method) {
-		if (method.ReturnType != typeof(void)) throw new ArgumentException(
-			"method must return void", nameof(method));
-		return CallDmd(null, typeof(void), method).Create<Action>();
+	extension (MethodInfo method) 
+	{
+		public Action EmitVoidCall() {
+			if (method.ReturnType != typeof(void)) throw new ArgumentException(
+				"method must return void", nameof(method));
+			return CallDm(null, typeof(void), method).Create<Action>();
+		}
+
+		public Action<Args> EmitVoidCall<Args>() => 
+			CallDm(typeof(Args), typeof(void), method).Create<Action<Args>>();
+		
+		public Func<Ret> EmitCall<Ret>() {
+			if (method.ReturnType != typeof(Ret)) throw new ArgumentException(
+				$"self does not return {typeof(Ret)}", nameof(method));
+			return CallDm(null, typeof(Ret), method).Create<Func<Ret>>();
+		}
+
+		public Func<Args, Ret> EmitCall<Args, Ret>() {
+			if (method.ReturnType != typeof(Ret)) throw new ArgumentException(
+				$"method does not return {typeof(Ret)}", nameof(method));
+			return CallDm(typeof(Args), typeof(Ret), method).Create<Func<Args, Ret>>();
+		}
+
+		public Func<object> EmitCallBoxed() => 
+			CallDm(null, typeof(object), method,
+				mapRet: il => il.Emit(OpCodes.Box, method.ReturnType))
+			.Create<Func<object>>();
+
+		public Func<Args, object> EmitCallBoxed<Args>() => 
+			CallDm(typeof(Args), typeof(object), method, 
+				mapRet: il => il.Emit(OpCodes.Box, method.ReturnType))
+			.Create<Func<Args, object>>();
 	}
 
-	public static Action<Args> CallVoid<Args>(MethodInfo method) => 
-		CallDmd(typeof(Args), typeof(void), method).Create<Action<Args>>();
-
-	public static Func<Ret> Call<Ret>(MethodInfo method) {
-		if (method.ReturnType != typeof(Ret)) throw new ArgumentException(
-			$"method does not return {typeof(Ret)}", nameof(method));
-		return CallDmd(null, typeof(Ret), method).Create<Func<Ret>>();
-	}
-
-	public static Func<Args, Ret> Call<Args, Ret>(MethodInfo method) {
-		if (method.ReturnType != typeof(Ret)) throw new ArgumentException(
-			$"method does not return {typeof(Ret)}", nameof(method));
-		return CallDmd(typeof(Args), typeof(Ret), method).Create<Func<Args, Ret>>();
-	}
-
-	public static Func<Args, object> CallBox<Args>(MethodInfo method) => 
-		CallDmd(typeof(Args), typeof(object), method, 
-			mapRet: il => il.Emit(OpCodes.Box, method.ReturnType))
-		.Create<Func<Args, object>>();
-
-	public static Func<object> CallBox(MethodInfo method) => 
-		CallDmd(null, typeof(object), method,
-			mapRet: il => il.Emit(OpCodes.Box, method.ReturnType))
-		.Create<Func<object>>();
-
-	static DynamicMethod CallDmd(
+	static DynamicMethod CallDm(
 		Type? args,
 		Type ret,
 		MethodInfo method,

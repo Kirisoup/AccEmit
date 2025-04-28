@@ -5,17 +5,18 @@ namespace AccEmit;
 
 public static partial class Emit
 {
-	public static Action<Val> Stsfld<Val>(FieldInfo field) {
-		if (field.FieldType != typeof(Val)) 
-			throw new ArgumentException($"field is not of type {typeof(Val)}", nameof(field));
-		return StsfldDmd<Val>(field);
-	}
+	extension (FieldInfo field) {
+		public Action<Val> EmitStsfld<Val>() {
+			if (field.FieldType != typeof(Val)) 
+				throw new ArgumentException($"field is not of type {typeof(Val)}", nameof(field));
+			return StsfldDmd<Val>(field);
+		}
 
-	[Obsolete("shit is unsafe, dont use unless you have to")]
-	public static Action<object> StsfldBox(FieldInfo field) => StsfldDmd<object>(
-		field,
-		valMap: !field.FieldType.IsValueType ? null : 
-			il => il.Emit(OpCodes.Unbox_Any, field.FieldType));
+		public Action<object> EmitStsfldBoxed() => StsfldDmd<object>(
+			field,
+			valMap: !field.FieldType.IsValueType ? null : 
+				il => il.Emit(OpCodes.Unbox_Any, field.FieldType));		
+	}
 
 	static Action<Val> StsfldDmd<Val>(FieldInfo fi, Action<ILGenerator>? valMap = null) {
 		var dm = new DynamicMethod(

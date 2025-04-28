@@ -5,38 +5,41 @@ namespace AccEmit;
 
 public static partial class Emit
 {
-	public static Func<Inst, Val> Ldfld<Inst, Val>(FieldInfo field) {
-		if (field.DeclaringType != typeof(Inst)) 
-			throw new ArgumentException($"field is not declared in type {typeof(Inst)}", nameof(field));
-		if (field.FieldType != typeof(Val)) 
-			throw new ArgumentException($"field is not of type {typeof(Val)}", nameof(field));
-		return LdfldDmd<Inst, Val>(field);
-	}
+	extension (FieldInfo field) 
+	{
+		public Func<Inst, Val> EmitLdfld<Inst, Val>() {
+			if (field.DeclaringType != typeof(Inst)) 
+				throw new ArgumentException($"field is not declared in type {typeof(Inst)}", nameof(field));
+			if (field.FieldType != typeof(Val)) 
+				throw new ArgumentException($"field is not of type {typeof(Val)}", nameof(field));
+			return LdfldDm<Inst, Val>(field);
+		}
 
-	public static Func<object, Val> LdfldBoxVal<Val>(FieldInfo field) {
-		if (field.FieldType != typeof(Val)) 
-			throw new ArgumentException($"field is not of type {typeof(Val)}", nameof(field));
-		return LdfldDmd<object, Val>(field,
-			mapInst: !field.DeclaringType.IsValueType ? null :
-				il => il.Emit(OpCodes.Unbox_Any, field.DeclaringType));
-	}
+		public Func<object, Val> EmitLdfldBoxVal<Val>() {
+			if (field.FieldType != typeof(Val)) 
+				throw new ArgumentException($"field is not of type {typeof(Val)}", nameof(field));
+			return LdfldDm<object, Val>(field,
+				mapInst: !field.DeclaringType.IsValueType ? null :
+					il => il.Emit(OpCodes.Unbox_Any, field.DeclaringType));
+		}
 
-	public static Func<Inst, object> LdfldBoxInst<Inst>(FieldInfo field) {
-		if (field.DeclaringType != typeof(Inst)) 
-			throw new ArgumentException($"field is not declared in type {typeof(Inst)}", nameof(field));
-		return LdfldDmd<Inst, object>(field,
+		public Func<Inst, object> EmitLdfldBoxInst<Inst>() {
+			if (field.DeclaringType != typeof(Inst)) 
+				throw new ArgumentException($"field is not declared in type {typeof(Inst)}", nameof(field));
+			return LdfldDm<Inst, object>(field,
+				mapRet: !field.FieldType.IsValueType ? null: 
+					il => il.Emit(OpCodes.Box, field.FieldType));
+		}
+
+		public Func<object, object> EmitLdfldBoxed() => LdfldDm<object, object>(
+			field,
+			mapInst: !field.DeclaringType.IsValueType ? null : 
+				il => il.Emit(OpCodes.Unbox_Any, field.DeclaringType),
 			mapRet: !field.FieldType.IsValueType ? null: 
 				il => il.Emit(OpCodes.Box, field.FieldType));
 	}
 
-	public static Func<object, object> LdfldBox(FieldInfo field) => LdfldDmd<object, object>(
-		field,
-		mapInst: !field.DeclaringType.IsValueType ? null : 
-			il => il.Emit(OpCodes.Unbox_Any, field.DeclaringType),
-		mapRet: !field.FieldType.IsValueType ? null: 
-			il => il.Emit(OpCodes.Box, field.FieldType));
-
-	static Func<Inst, Ret> LdfldDmd<Inst, Ret>(FieldInfo fi,
+	static Func<Inst, Ret> LdfldDm<Inst, Ret>(FieldInfo fi,
 		Action<ILGenerator>? mapInst = null,
 		Action<ILGenerator>? mapRet = null) 
 	{
