@@ -65,8 +65,11 @@ public static partial class Emit
 				? method.GetParameters().Single().GetType()
 				: method.DeclaringType;
 			if (argType.IsByRef) throw new NotImplementedException("by-ref argument in method is not yet implemented");
+			bool unbox = false;
+			if (argType == typeof(object)) unbox = true;
+			else if (argType != args) break;
 			il.Emit(OpCodes.Ldarg_0);
-			if (argType.IsValueType && args! == typeof(object)) il.Emit(OpCodes.Unbox, argType);
+			if (argType.IsValueType && unbox) il.Emit(OpCodes.Unbox, argType);
 			break;
 		case >1:
 			int i = 1;
@@ -100,6 +103,7 @@ public static partial class Emit
 			
 			il.Emit(OpCodes.Ldfld, fld);
 			if (boxed && unbox) il.Emit(OpCodes.Unbox_Any, type);
+			return;
 		}
 
 		@continue:
@@ -115,6 +119,7 @@ public static partial class Emit
 				[]);
 			
 			if (boxed && unbox) il.Emit(OpCodes.Unbox_Any, type);
+			return;
 		}
 		
 		@throw:
