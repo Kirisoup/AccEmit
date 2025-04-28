@@ -3,7 +3,7 @@ using System.Reflection.Emit;
 
 namespace AccEmit;
 
-public static partial class AccEmit
+public static partial class Emit
 {
 	public static Func<Val> Ldsfld<Val>(FieldInfo field) {
 		if (!field.IsStatic) throw new ArgumentException($"cannot call ldsfld on a static field", nameof(field));

@@ -4,7 +4,7 @@ using System.Reflection.Emit;
 namespace AccEmit;
 
 // using Debug = System.Debug;
-public static partial class AccEmit
+public static partial class Emit
 {
 	public static Action CallVoid(MethodInfo method) {
 		if (method.ReturnType != typeof(void)) throw new ArgumentException(

@@ -3,7 +3,7 @@ using System.Reflection.Emit;
 
 namespace AccEmit;
 
-public static partial class AccEmit
+public static partial class Emit
 {
 	public static Action<Val> Stsfld<Val>(FieldInfo field) {
 		if (field.FieldType != typeof(Val)) 
