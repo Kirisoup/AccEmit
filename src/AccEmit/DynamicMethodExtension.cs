@@ -2,7 +2,7 @@ using System.Reflection.Emit;
 
 namespace AccEmit;
 
-public static class DynamicMethodExtension
+internal static class DynamicMethodExtension
 {
 	extension (DynamicMethod dm) 
 	{
