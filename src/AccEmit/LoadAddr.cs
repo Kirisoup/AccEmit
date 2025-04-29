@@ -15,7 +15,7 @@ public static partial class Emit
 			return LdfldaDm<Inst, Val>(field);
 		}
 
-		public FuncRef<object, Val> EmitLoadAddrBoxAcc<Val>() {
+		public FuncRef<object, Val> EmitUnboxLoadAddr<Val>() {
 			if (field.FieldType != typeof(Val)) 
 				throw new ArgumentException($"field is not of type {typeof(Val)}", nameof(field));
 			return LdfldaDm<object, Val>(field,

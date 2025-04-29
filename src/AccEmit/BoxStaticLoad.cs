@@ -6,7 +6,7 @@ namespace AccEmit;
 public static partial class Emit
 {
 	extension (FieldInfo field) {
-		public Func<object> EmitBoxedStaticLoad() => LdsfldDm<object>(
+		public Func<object> EmitBoxStaticLoad() => LdsfldDm<object>(
 			field,
 			mapRet: !field.FieldType.IsValueType ? null : 
 				il => il.Emit(OpCodes.Box, field.FieldType));

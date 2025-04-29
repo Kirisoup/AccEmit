@@ -7,7 +7,7 @@ public static partial class Emit
 {
 	extension (FieldInfo field) 
 	{
-		public Action<Inst, object> EmitBoxedSet<Inst>() {
+		public Action<Inst, object> EmitUnboxSet<Inst>() {
 			if (field.DeclaringType != typeof(Inst)) 
 				throw new ArgumentException($"field is not declared in type {typeof(Inst)}", nameof(field));
 			return StfldDmd<Inst, object>(field,
@@ -15,7 +15,7 @@ public static partial class Emit
 					il => il.Emit(OpCodes.Unbox_Any, field.FieldType));
 		}
 
-		public Action<object, object> EmitBoxedSet() => StfldDmd<object, object>(
+		public Action<object, object> EmitUnboxSet() => StfldDmd<object, object>(
 			field,
 			mapInst: !field.DeclaringType.IsValueType ? null : 
 				il => il.Emit(OpCodes.Unbox_Any, field.DeclaringType),

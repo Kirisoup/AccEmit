@@ -7,7 +7,7 @@ public static partial class Emit
 {
 	extension (FieldInfo field) 
 	{
-		public Action<object> EmitBoxedStaticSet() => StsfldDmd<object>(
+		public Action<object> EmitUnboxStaticSet() => StsfldDmd<object>(
 			field,
 			valMap: !field.FieldType.IsValueType ? null : 
 				il => il.Emit(OpCodes.Unbox_Any, field.FieldType));		
