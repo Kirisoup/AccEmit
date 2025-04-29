@@ -7,19 +7,14 @@ public static partial class Emit
 {
 	extension (FieldInfo field) 
 	{
-		public Action<Val> EmitStaticSet<Val>() {
-			if (field.FieldType != typeof(Val)) 
-				throw new ArgumentException($"field is not of type {typeof(Val)}", nameof(field));
-			return StsfldDmd<Val>(field);
-		}
-
-		public Action<object> EmitStaticSetBox() => StsfldDmd<object>(
+		public Action<object> EmitBoxedStaticSet() => StsfldDmd<object>(
 			field,
 			valMap: !field.FieldType.IsValueType ? null : 
 				il => il.Emit(OpCodes.Unbox_Any, field.FieldType));		
 	}
 
 	static Action<Val> StsfldDmd<Val>(FieldInfo fi, Action<ILGenerator>? valMap = null) {
+		if (!fi.IsStatic) throw new ArgumentException($"cannot call ldfld on non static field");
 		var dm = new DynamicMethod(
 			name: $"<{fi.DeclaringType.FullName}>stsfld_{fi.Name}",
 			returnType: typeof(void),

@@ -7,15 +7,7 @@ public static partial class Emit
 {
 	extension (FieldInfo field) 
 	{
-		public Func<Inst, Val> EmitLoad<Inst, Val>() {
-			if (field.DeclaringType != typeof(Inst)) 
-				throw new ArgumentException($"field is not declared in type {typeof(Inst)}", nameof(field));
-			if (field.FieldType != typeof(Val)) 
-				throw new ArgumentException($"field is not of type {typeof(Val)}", nameof(field));
-			return LdfldDm<Inst, Val>(field);
-		}
-
-		public Func<Inst, object> EmitLoadBoxRet<Inst>() {
+		public Func<Inst, object> EmitBoxedLoad<Inst>() {
 			if (field.DeclaringType != typeof(Inst)) 
 				throw new ArgumentException($"field is not declared in type {typeof(Inst)}", nameof(field));
 			return LdfldDm<Inst, object>(field,
@@ -23,15 +15,7 @@ public static partial class Emit
 					il => il.Emit(OpCodes.Box, field.FieldType));
 		}
 
-		public Func<object, Val> EmitLoadBoxAcc<Val>() {
-			if (field.FieldType != typeof(Val)) 
-				throw new ArgumentException($"field is not of type {typeof(Val)}", nameof(field));
-			return LdfldDm<object, Val>(field,
-				mapInst: !field.DeclaringType.IsValueType ? null :
-					il => il.Emit(OpCodes.Unbox_Any, field.DeclaringType));
-		}
-
-		public Func<object, object> EmitLoadBox() => LdfldDm<object, object>(
+		public Func<object, object> EmitBoxedLoad() => LdfldDm<object, object>(
 			field,
 			mapInst: !field.DeclaringType.IsValueType ? null : 
 				il => il.Emit(OpCodes.Unbox_Any, field.DeclaringType),
